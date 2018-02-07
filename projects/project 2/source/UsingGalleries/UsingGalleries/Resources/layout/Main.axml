@@ -14,8 +14,7 @@
         android:src="@android:drawable/ic_menu_gallery"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/myImageView"
-        android:adjustViewBounds="false" />
+        android:id="@+id/myImageView" />
     <Button
         android:text="Delet Red"
         android:layout_width="match_parent"

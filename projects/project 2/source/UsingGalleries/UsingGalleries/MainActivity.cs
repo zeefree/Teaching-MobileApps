@@ -2,6 +2,7 @@
 using Android.Widget;
 using Android.OS;
 using Android.Content;
+using Android.Views;
 using System.Collections.Generic;
 using Android.Content.PM;
 using Android.Provider;
@@ -32,7 +33,7 @@ namespace UsingGalleries
                 imageIntent.SetType("image/*");
                 imageIntent.SetAction(Intent.ActionGetContent);
                 StartActivityForResult(
-                Intent.CreateChooser(imageIntent, "Select photo"), 0);
+                Intent.CreateChooser(imageIntent, "Select photo"), 1);
             };
         }
 
@@ -42,9 +43,13 @@ namespace UsingGalleries
 
             if (resultCode == Result.Ok)
             {
-                var imageView =
+                if(requestCode == 1)
+                {
+                    var imageView =
                     FindViewById<ImageView>(Resource.Id.myImageView);
-                imageView.SetImageURI(data.Data);
+                    imageView.SetImageURI(data.Data);
+                }
+                
             }
         }
 
