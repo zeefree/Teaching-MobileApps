@@ -12,47 +12,67 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/camerabutton" />
-        <Button
+    <!--  <Button
             android:text="Use photo from gallery"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/gallerybutton" />
+      -->
         <ImageView xmlns:p2="http://schemas.android.com/tools"
             android:src="@android:drawable/ic_menu_gallery"
             android:layout_width="match_parent"
             android:layout_height="300dp"
-            android:id="@+id/imageoutput" />
-        <HorizontalScrollView>
-            <ScrollView
+            android:id="@+id/imageoutput"
+            android:maxHeight="300dp"
+            android:adjustViewBounds="true" />
+        <HorizontalScrollView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:fillViewport="true">
-                <LinearLayout
-                    android:orientation="vertical"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-                    <Button
-                        android:text="asd"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/asdbutton" />
-                    <Button
-                        android:text="asd"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/asfbutton" />
-                    <Button
-                        android:text="asd"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/afdbutton" />
-                    <Button
-                        android:text="asd"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/qsdbutton" />
-                </LinearLayout>
-            </ScrollView>
+                android:layout_height="match_parent">
+                <Button
+                    android:text="Remove Red"
+                    android:layout_width="100dp"
+                    android:layout_height="60dp"
+                    android:id="@+id/removeredbutton" />
+                <Button
+                    android:text="Remove Blue"
+                    android:layout_width="100dp"
+                    android:layout_height="60dp"
+                    android:id="@+id/removebluebutton" />
+                <Button
+                    android:text="Remove Green"
+                    android:layout_width="100dp"
+                    android:layout_height="60dp"
+                    android:id="@+id/removegreenbutton" />
+                <Button
+                    android:text="Negate Red"
+                    android:layout_width="100dp"
+                    android:layout_height="60dp"
+                    android:id="@+id/negateredbutton" />
+                <Button
+                    android:text="Negate Blue"
+                    android:layout_width="100dp"
+                    android:layout_height="60dp"
+                    android:id="@+id/negatebluebutton" />
+                <Button
+                    android:text="Negate Green"
+                    android:layout_width="100dp"
+                    android:layout_height="60dp"
+                    android:id="@+id/negategreenbutton" />
+            </LinearLayout>
         </HorizontalScrollView>
+        <Button
+            android:text="Save Picture to Gallery"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/savebutton" />
+        <Button
+            android:text="Clear Picture"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/clearbutton" />
     </LinearLayout>
 </ScrollView>

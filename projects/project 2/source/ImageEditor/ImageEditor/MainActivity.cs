@@ -1,4 +1,5 @@
-﻿using Android.App;
+﻿using System;
+using Android.App;
 using Android.Widget;
 using Android.OS;
 using Android.Views;
@@ -6,6 +7,7 @@ using Android.Content;
 using System.Collections.Generic;
 using Android.Content.PM;
 using Android.Provider;
+using Android.Graphics.Drawables;
 
 namespace ImageEditor
 {
@@ -32,11 +34,32 @@ namespace ImageEditor
             // Set our view from the "main" layout resource
             SetContentView(Resource.Layout.Main);
 
-            Button gallybtn = FindViewById<Button>(Resource.Id.gallerybutton);
+            // Button gallybtn = FindViewById<Button>(Resource.Id.gallerybutton);
             Button cambtn = FindViewById<Button>(Resource.Id.camerabutton);
+            Button savebtn = FindViewById<Button>(Resource.Id.savebutton);
+            Button clrbtn = FindViewById<Button>(Resource.Id.clearbutton);
+
+            // Effect Buttons
+            Button rmvred = FindViewById<Button>(Resource.Id.removeredbutton);
+            Button rmvblue = FindViewById<Button>(Resource.Id.removebluebutton);
+            Button rmvgreen = FindViewById<Button>(Resource.Id.removegreenbutton);
+
+            Button negatered = FindViewById<Button>(Resource.Id.negateredbutton);
+            Button negateblue = FindViewById<Button>(Resource.Id.negatebluebutton);
+            Button negategreen = FindViewById<Button>(Resource.Id.negategreenbutton);
+
 
             var imageView = FindViewById<ImageView>(Resource.Id.imageoutput);
             imageView.Visibility = Android.Views.ViewStates.Invisible;
+
+
+            rmvred.Click += delegate { RemoveColor('r', imageView); };
+            rmvblue.Click += delegate { RemoveColor('b', imageView); };
+            rmvgreen.Click += delegate { RemoveColor('g', imageView); };
+
+            negatered.Click += delegate { NegateColor('r', imageView); };
+            negateblue.Click += delegate { NegateColor('b', imageView); };
+            negategreen.Click += delegate { NegateColor('g', imageView); };
 
             if (IsThereAnAppToTakePictures() == true)
             {
@@ -44,6 +67,7 @@ namespace ImageEditor
                 cambtn.Click += TakePicture;
             }
 
+            /*
             gallybtn.Click += delegate 
             {
                 var imageIntent = new Intent();
@@ -51,8 +75,140 @@ namespace ImageEditor
                 imageIntent.SetAction(Intent.ActionGetContent);
                 StartActivityForResult(Intent.CreateChooser(imageIntent, "Select photo"), 1);
             };
+            */
         }
 
+        public void RemoveColor(char color, ImageView imageoutput)
+        {
+            //Weird hoops you gotta go through to get some bitmaps :/
+            Android.Graphics.Drawables.BitmapDrawable bd = (Android.Graphics.Drawables.BitmapDrawable)imageoutput.Drawable;
+            Android.Graphics.Bitmap bitmap = bd.Bitmap;
+
+            Android.Graphics.Bitmap copyBitmap = bitmap.Copy(Android.Graphics.Bitmap.Config.Argb8888, true);
+
+            switch (color)
+            {
+                case 'r':
+                    {
+                        for (int i = 0; i < bitmap.Width; i++)
+                        {
+                            for (int j = 0; j < bitmap.Height; j++)
+                            {
+                                int p = bitmap.GetPixel(i, j);
+                                Android.Graphics.Color c = new Android.Graphics.Color(p);
+                                c.R = 0;
+                                copyBitmap.SetPixel(i, j, c);
+                            }
+                        }
+                        break;
+                    }
+                case 'g':
+                    {
+                        for (int i = 0; i < bitmap.Width; i++)
+                        {
+                            for (int j = 0; j < bitmap.Height; j++)
+                            {
+                                int p = bitmap.GetPixel(i, j);
+                                Android.Graphics.Color c = new Android.Graphics.Color(p);
+                                c.G = 0;
+                                copyBitmap.SetPixel(i, j, c);
+                            }
+                        }
+                        break;
+                    }
+                case 'b':
+                    {
+                        for (int i = 0; i < bitmap.Width; i++)
+                        {
+                            for (int j = 0; j < bitmap.Height; j++)
+                            {
+                                int p = bitmap.GetPixel(i, j);
+                                Android.Graphics.Color c = new Android.Graphics.Color(p);
+                                c.B = 0;
+                                copyBitmap.SetPixel(i, j, c);
+                            }
+                        }
+                        break;
+                    }
+                default:
+                    {
+                        break;
+                    }
+            }
+            if (copyBitmap != null)
+            {
+                imageoutput.SetImageBitmap(copyBitmap);
+                bitmap = null;
+                copyBitmap = null;
+            }
+            System.GC.Collect();
+        }
+
+        private void NegateColor(char color, ImageView imageoutput)
+        {
+            //Weird hoops you gotta go through to get some bitmaps :/
+            Android.Graphics.Drawables.BitmapDrawable bd = (Android.Graphics.Drawables.BitmapDrawable)imageoutput.Drawable;
+            Android.Graphics.Bitmap bitmap = bd.Bitmap;
+
+            Android.Graphics.Bitmap copyBitmap = bitmap.Copy(Android.Graphics.Bitmap.Config.Argb8888, true);
+
+            switch (color)
+            {
+                case 'r':
+                    {
+                        for (int i = 0; i < bitmap.Width; i++)
+                        {
+                            for (int j = 0; j < bitmap.Height; j++)
+                            {
+                                int p = bitmap.GetPixel(i, j);
+                                Android.Graphics.Color c = new Android.Graphics.Color(p);
+                                c.R = (byte) (255 - c.R);
+                                copyBitmap.SetPixel(i, j, c);
+                            }
+                        }
+                        break;
+                    }
+                case 'g':
+                    {
+                        for (int i = 0; i < bitmap.Width; i++)
+                        {
+                            for (int j = 0; j < bitmap.Height; j++)
+                            {
+                                int p = bitmap.GetPixel(i, j);
+                                Android.Graphics.Color c = new Android.Graphics.Color(p);
+                                c.G = (byte)(255 - c.G);
+                                copyBitmap.SetPixel(i, j, c);
+                            }
+                        }
+                        break;
+                    }
+                case 'b':
+                    {
+                        for (int i = 0; i < bitmap.Width; i++)
+                        {
+                            for (int j = 0; j < bitmap.Height; j++)
+                            {
+                                int p = bitmap.GetPixel(i, j);
+                                Android.Graphics.Color c = new Android.Graphics.Color(p);
+                                c.B = (byte)(255 - c.B);
+                                copyBitmap.SetPixel(i, j, c);
+                            }
+                        }
+                        break;
+                    }
+                default:
+                    {
+                        break;
+                    }
+            }
+            if (copyBitmap != null)
+            {
+                imageoutput.SetImageBitmap(copyBitmap);
+                bitmap = null;
+                copyBitmap = null;
+            }
+            System.GC.Collect();
+        }
 
         //Need to make sure that the device actually has a camera before trying to use it.
         private bool IsThereAnAppToTakePictures()
@@ -92,6 +248,8 @@ namespace ImageEditor
         {
             base.OnActivityResult(requestCode, resultCode, data);
 
+            //WHY ARE GALLERY IMAGES BIGGER THAN CAMERA IMAGES?!?!?!?!?!?!!!?!?!?!?!?!?!?!!?!?!?!?!?!?!?
+            //If I find a fix this may actually do something
             if (requestCode == 1)
             {
                 if (resultCode == Result.Ok)
