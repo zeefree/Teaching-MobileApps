@@ -8,7 +8,8 @@ using System.Collections.Generic;
 using Android.Content.PM;
 using Android.Provider;
 using Android.Graphics.Drawables;
-using Android.Graphics;
+
+using System.IO;
 
 
 namespace ImageEditor
@@ -43,6 +44,7 @@ namespace ImageEditor
             Button cambtn = FindViewById<Button>(Resource.Id.camerabutton);
             Button savebtn = FindViewById<Button>(Resource.Id.savebutton);
             Button clrbtn = FindViewById<Button>(Resource.Id.clearbutton);
+            Button gallybtn = FindViewById<Button>(Resource.Id.gallerybutton);
 
             // Effect Buttons
             Button rmvred = FindViewById<Button>(Resource.Id.removeredbutton);
@@ -53,6 +55,9 @@ namespace ImageEditor
             Button negateblue = FindViewById<Button>(Resource.Id.negatebluebutton);
             Button negategreen = FindViewById<Button>(Resource.Id.negategreenbutton);
 
+            Button noisebtn = FindViewById<Button>(Resource.Id.noisebutton);
+            Button contrastbtn = FindViewById<Button>(Resource.Id.contrastbutton);
+            Button greyscale = FindViewById<Button>(Resource.Id.greyscalebutton);
 
             ImageView imageView = FindViewById<ImageView>(Resource.Id.imageoutput);
             imageView.Visibility = Android.Views.ViewStates.Invisible;
@@ -66,6 +71,12 @@ namespace ImageEditor
             negateblue.Click += delegate { NegateColor('b', imageView); };
             negategreen.Click += delegate { NegateColor('g', imageView); };
 
+            noisebtn.Click += delegate { RandomNoise(imageView); };
+
+            contrastbtn.Click += delegate { HighContrast(imageView); };
+
+            greyscale.Click += delegate { GreyScale(imageView); };
+            
             clrbtn.Click += delegate { imageView.SetImageBitmap(null); };
 
             savebtn.Click += delegate
@@ -83,7 +94,7 @@ namespace ImageEditor
                 cambtn.Click += TakePicture;
             }
 
-            /*
+            
             gallybtn.Click += delegate 
             {
                 var imageIntent = new Intent();
@@ -91,10 +102,43 @@ namespace ImageEditor
                 imageIntent.SetAction(Intent.ActionGetContent);
                 StartActivityForResult(Intent.CreateChooser(imageIntent, "Select photo"), 1);
             };
-            */
+            
         }
 
-      
+        private void GreyScale(ImageView imageoutput)
+        {
+            Android.Graphics.Drawables.BitmapDrawable bd = (Android.Graphics.Drawables.BitmapDrawable)imageoutput.Drawable;
+            Android.Graphics.Bitmap bitmap = bd.Bitmap;
+
+            if (bitmap != null)
+            {
+                Android.Graphics.Bitmap copyBitmap = bitmap.Copy(Android.Graphics.Bitmap.Config.Argb8888, true);
+                for (int i = 0; i < bitmap.Width; i++)
+                {
+                    for (int j = 0; j < bitmap.Height; j++)
+                    {
+                        int p = bitmap.GetPixel(i, j);
+                        Android.Graphics.Color c = new Android.Graphics.Color(p);
+
+                        c.R = (byte)((c.R + c.G + c.B) / 3);
+                        c.G = (byte)((c.R + c.G + c.B) / 3);
+                        c.B = (byte)((c.R + c.G + c.B) / 3);
+
+                        copyBitmap.SetPixel(i, j, c);
+                    }
+                }
+                if (copyBitmap != null)
+                {
+                    imageoutput.SetImageBitmap(copyBitmap);
+                    bitmap = null;
+                    copyBitmap = null;
+                }
+                System.GC.Collect();
+            }
+        }
+
+        
+
         private void RemoveColor(char color, ImageView imageoutput)
         {
             //Weird hoops you gotta go through to get some bitmaps :/
@@ -163,7 +207,6 @@ namespace ImageEditor
             }
         }
             
-
         private void NegateColor(char color, ImageView imageoutput)
         {
             //Weird hoops you gotta go through to get some bitmaps :/
@@ -172,62 +215,163 @@ namespace ImageEditor
 
             Android.Graphics.Bitmap copyBitmap = bitmap.Copy(Android.Graphics.Bitmap.Config.Argb8888, true);
 
-            switch (color)
+            if(bitmap != null)
             {
-                case 'r':
-                    {
-                        for (int i = 0; i < bitmap.Width; i++)
+                switch (color)
+                {
+                    case 'r':
                         {
-                            for (int j = 0; j < bitmap.Height; j++)
+                            for (int i = 0; i < bitmap.Width; i++)
                             {
-                                int p = bitmap.GetPixel(i, j);
-                                Android.Graphics.Color c = new Android.Graphics.Color(p);
-                                c.R = (byte) (255 - c.R);
-                                copyBitmap.SetPixel(i, j, c);
+                                for (int j = 0; j < bitmap.Height; j++)
+                                {
+                                    int p = bitmap.GetPixel(i, j);
+                                    Android.Graphics.Color c = new Android.Graphics.Color(p);
+                                    c.R = (byte)(255 - c.R);
+                                    copyBitmap.SetPixel(i, j, c);
+                                }
                             }
+                            break;
                         }
-                        break;
-                    }
-                case 'g':
-                    {
-                        for (int i = 0; i < bitmap.Width; i++)
+                    case 'g':
                         {
-                            for (int j = 0; j < bitmap.Height; j++)
+                            for (int i = 0; i < bitmap.Width; i++)
                             {
-                                int p = bitmap.GetPixel(i, j);
-                                Android.Graphics.Color c = new Android.Graphics.Color(p);
-                                c.G = (byte)(255 - c.G);
-                                copyBitmap.SetPixel(i, j, c);
+                                for (int j = 0; j < bitmap.Height; j++)
+                                {
+                                    int p = bitmap.GetPixel(i, j);
+                                    Android.Graphics.Color c = new Android.Graphics.Color(p);
+                                    c.G = (byte)(255 - c.G);
+                                    copyBitmap.SetPixel(i, j, c);
+                                }
                             }
+                            break;
                         }
-                        break;
-                    }
-                case 'b':
-                    {
-                        for (int i = 0; i < bitmap.Width; i++)
+                    case 'b':
                         {
-                            for (int j = 0; j < bitmap.Height; j++)
+                            for (int i = 0; i < bitmap.Width; i++)
                             {
-                                int p = bitmap.GetPixel(i, j);
-                                Android.Graphics.Color c = new Android.Graphics.Color(p);
-                                c.B = (byte)(255 - c.B);
-                                copyBitmap.SetPixel(i, j, c);
+                                for (int j = 0; j < bitmap.Height; j++)
+                                {
+                                    int p = bitmap.GetPixel(i, j);
+                                    Android.Graphics.Color c = new Android.Graphics.Color(p);
+                                    c.B = (byte)(255 - c.B);
+                                    copyBitmap.SetPixel(i, j, c);
+                                }
                             }
+                            break;
                         }
-                        break;
-                    }
-                default:
-                    {
-                        break;
-                    }
+                    default:
+                        {
+                            break;
+                        }
+                }
+                if (copyBitmap != null)
+                {
+                    imageoutput.SetImageBitmap(copyBitmap);
+                    bitmap = null;
+                    copyBitmap = null;
+                }
+                System.GC.Collect();
             }
-            if (copyBitmap != null)
+        }
+            
+        private void RandomNoise(ImageView imageoutput)
+        
+        {
+            Android.Graphics.Drawables.BitmapDrawable bd = (Android.Graphics.Drawables.BitmapDrawable)imageoutput.Drawable;
+            Android.Graphics.Bitmap bitmap = bd.Bitmap;
+
+            System.Random rnd = new Random();
+
+            if(bitmap != null)
             {
-                imageoutput.SetImageBitmap(copyBitmap);
-                bitmap = null;
-                copyBitmap = null;
+                Android.Graphics.Bitmap copyBitmap = bitmap.Copy(Android.Graphics.Bitmap.Config.Argb8888, true);
+                for (int i = 0; i < bitmap.Width; i++)
+                {
+                    for (int j = 0; j < bitmap.Height; j++)
+                    {
+                        int noise = rnd.Next(-7, 7);
+                        int p = bitmap.GetPixel(i, j);
+                        Android.Graphics.Color c = new Android.Graphics.Color(p);
+                       // int red = c.R + noise;
+                       // int green = c.G + noise;
+                       // int blue = c.B + noise;
+
+                        c.R = (byte) (AdjustPixelValue(c.R + noise));
+                        c.G = (byte)(AdjustPixelValue(c.G + noise));
+                        c.B = (byte)(AdjustPixelValue(c.B + noise));
+
+
+                        copyBitmap.SetPixel(i, j, c);
+                    }
+                }
+                if (copyBitmap != null)
+                {
+                    imageoutput.SetImageBitmap(copyBitmap);
+                    bitmap = null;
+                    copyBitmap = null;
+                }
+                System.GC.Collect();
             }
-            System.GC.Collect();
+        }
+
+        private int AdjustPixelValue(int to_adjust)
+        {
+            if(to_adjust < 0)
+            {
+                return 0;
+            }
+            else if(to_adjust > 255)
+            {
+                return 255;
+            }
+
+            return to_adjust;
+        }
+
+        private void HighContrast(ImageView imageoutput)
+        {
+            Android.Graphics.Drawables.BitmapDrawable bd = (Android.Graphics.Drawables.BitmapDrawable)imageoutput.Drawable;
+            Android.Graphics.Bitmap bitmap = bd.Bitmap;
+
+            if (bitmap != null)
+            {
+                Android.Graphics.Bitmap copyBitmap = bitmap.Copy(Android.Graphics.Bitmap.Config.Argb8888, true);
+                for (int i = 0; i < bitmap.Width; i++)
+                {
+                    for (int j = 0; j < bitmap.Height; j++)
+                    {
+                        int p = bitmap.GetPixel(i, j);
+                        Android.Graphics.Color c = new Android.Graphics.Color(p);
+        
+                        c.R = (byte)(ContrastPixelValue(c.R));
+                        c.G = (byte)(ContrastPixelValue(c.G));
+                        c.B = (byte)(ContrastPixelValue(c.B));
+
+                        copyBitmap.SetPixel(i, j, c);
+                    }
+                }
+                if (copyBitmap != null)
+                {
+                    imageoutput.SetImageBitmap(copyBitmap);
+                    bitmap = null;
+                    copyBitmap = null;
+                }
+                System.GC.Collect();
+            }
+        }
+
+        private int ContrastPixelValue(int to_check)
+        {
+            if(to_check >= (255/2))
+            {
+                return 255;
+            }
+            else
+            {
+                return 0;
+            }
         }
 
         //Need to make sure that the device actually has a camera before trying to use it.
@@ -280,6 +424,22 @@ namespace ImageEditor
 
                     imageView.SetImageURI(data.Data);
 
+                    Android.Graphics.Drawables.BitmapDrawable bd = (Android.Graphics.Drawables.BitmapDrawable)imageView.Drawable;
+                    Android.Graphics.Bitmap bitmap = bd.Bitmap;
+
+                    //Gotta shrink down the bitmaps because they tend to be too big
+
+
+
+                    int height = bitmap.Height;
+                    int width = bitmap.Width;
+
+                    ScaleBounds(ref height,ref width);
+
+                    Android.Graphics.Bitmap smallBitmap =
+                    Android.Graphics.Bitmap.CreateScaledBitmap(bitmap, width, height, true);
+
+                    imageView.SetImageBitmap(smallBitmap);
 
                     imageView.Visibility = Android.Views.ViewStates.Visible;
                 }
@@ -314,10 +474,29 @@ namespace ImageEditor
             }
         }
 
-        void ExportBitmapAsPNG(Bitmap bitmap)
-        { 
-            var stream = new FileStream(_file.Path, FileMode.Create);
-            bitmap.Compress(Bitmap.CompressFormat.Png, 100, stream);
+        //Most images are going to be too big so we need to shrink them down
+        // This is an attempt to properly scale down images so they keep resolution
+        //The point of acceptable_resoultion is to act as a point of refrence to scale images down to
+        private void ScaleBounds(ref int height,ref int width)
+        {
+            int acceptal_resoultion = 1024 * 768;
+            int cur_resoultion = height * width;
+
+            if (cur_resoultion > acceptal_resoultion)
+            {
+                height = height / (2 + (cur_resoultion / acceptal_resoultion));
+                width = width / (2 + (cur_resoultion / acceptal_resoultion));
+            }
+        }
+       
+        void ExportBitmapAsPNG(Android.Graphics.Bitmap bitmap)
+        {
+
+            var path = System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData);
+            var filename = Path.Combine(path, "newFile.png");
+
+            var stream = new FileStream(filename, FileMode.Create);
+            bitmap.Compress(Android.Graphics.Bitmap.CompressFormat.Png, 100, stream);
             stream.Close();
         }
     }
