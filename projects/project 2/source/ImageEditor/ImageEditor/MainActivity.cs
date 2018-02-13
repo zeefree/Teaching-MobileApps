@@ -8,13 +8,16 @@ using System.Collections.Generic;
 using Android.Content.PM;
 using Android.Provider;
 using Android.Graphics.Drawables;
+using Android.Graphics;
+
 
 namespace ImageEditor
 {
-    [Activity(Label = "ImageEditor", MainLauncher = true)]
+    [Activity(Label = "ImageEditor", MainLauncher = true, ScreenOrientation = ScreenOrientation.Portrait)]
     public class MainActivity : Activity
     {
 
+      
         /// <summary>
         /// Used to track the file that we're manipulating between functions
         /// </summary>
@@ -34,6 +37,8 @@ namespace ImageEditor
             // Set our view from the "main" layout resource
             SetContentView(Resource.Layout.Main);
 
+
+
             // Button gallybtn = FindViewById<Button>(Resource.Id.gallerybutton);
             Button cambtn = FindViewById<Button>(Resource.Id.camerabutton);
             Button savebtn = FindViewById<Button>(Resource.Id.savebutton);
@@ -49,7 +54,7 @@ namespace ImageEditor
             Button negategreen = FindViewById<Button>(Resource.Id.negategreenbutton);
 
 
-            var imageView = FindViewById<ImageView>(Resource.Id.imageoutput);
+            ImageView imageView = FindViewById<ImageView>(Resource.Id.imageoutput);
             imageView.Visibility = Android.Views.ViewStates.Invisible;
 
 
@@ -60,6 +65,17 @@ namespace ImageEditor
             negatered.Click += delegate { NegateColor('r', imageView); };
             negateblue.Click += delegate { NegateColor('b', imageView); };
             negategreen.Click += delegate { NegateColor('g', imageView); };
+
+            clrbtn.Click += delegate { imageView.SetImageBitmap(null); };
+
+            savebtn.Click += delegate
+            {
+                Android.Graphics.Drawables.BitmapDrawable bd = (Android.Graphics.Drawables.BitmapDrawable)imageView.Drawable;
+                Android.Graphics.Bitmap bitmap = bd.Bitmap;
+
+                ExportBitmapAsPNG(bitmap);
+
+            };
 
             if (IsThereAnAppToTakePictures() == true)
             {
@@ -78,71 +94,75 @@ namespace ImageEditor
             */
         }
 
-        public void RemoveColor(char color, ImageView imageoutput)
+      
+        private void RemoveColor(char color, ImageView imageoutput)
         {
             //Weird hoops you gotta go through to get some bitmaps :/
             Android.Graphics.Drawables.BitmapDrawable bd = (Android.Graphics.Drawables.BitmapDrawable)imageoutput.Drawable;
             Android.Graphics.Bitmap bitmap = bd.Bitmap;
-
-            Android.Graphics.Bitmap copyBitmap = bitmap.Copy(Android.Graphics.Bitmap.Config.Argb8888, true);
-
-            switch (color)
+            if(bitmap != null)
             {
-                case 'r':
-                    {
-                        for (int i = 0; i < bitmap.Width; i++)
+                Android.Graphics.Bitmap copyBitmap = bitmap.Copy(Android.Graphics.Bitmap.Config.Argb8888, true);
+
+                switch (color)
+                {
+                    case 'r':
                         {
-                            for (int j = 0; j < bitmap.Height; j++)
+                            for (int i = 0; i < bitmap.Width; i++)
                             {
-                                int p = bitmap.GetPixel(i, j);
-                                Android.Graphics.Color c = new Android.Graphics.Color(p);
-                                c.R = 0;
-                                copyBitmap.SetPixel(i, j, c);
+                                for (int j = 0; j < bitmap.Height; j++)
+                                {
+                                    int p = bitmap.GetPixel(i, j);
+                                    Android.Graphics.Color c = new Android.Graphics.Color(p);
+                                    c.R = 0;
+                                    copyBitmap.SetPixel(i, j, c);
+                                }
                             }
+                            break;
                         }
-                        break;
-                    }
-                case 'g':
-                    {
-                        for (int i = 0; i < bitmap.Width; i++)
+                    case 'g':
                         {
-                            for (int j = 0; j < bitmap.Height; j++)
+                            for (int i = 0; i < bitmap.Width; i++)
                             {
-                                int p = bitmap.GetPixel(i, j);
-                                Android.Graphics.Color c = new Android.Graphics.Color(p);
-                                c.G = 0;
-                                copyBitmap.SetPixel(i, j, c);
+                                for (int j = 0; j < bitmap.Height; j++)
+                                {
+                                    int p = bitmap.GetPixel(i, j);
+                                    Android.Graphics.Color c = new Android.Graphics.Color(p);
+                                    c.G = 0;
+                                    copyBitmap.SetPixel(i, j, c);
+                                }
                             }
+                            break;
                         }
-                        break;
-                    }
-                case 'b':
-                    {
-                        for (int i = 0; i < bitmap.Width; i++)
+                    case 'b':
                         {
-                            for (int j = 0; j < bitmap.Height; j++)
+                            for (int i = 0; i < bitmap.Width; i++)
                             {
-                                int p = bitmap.GetPixel(i, j);
-                                Android.Graphics.Color c = new Android.Graphics.Color(p);
-                                c.B = 0;
-                                copyBitmap.SetPixel(i, j, c);
+                                for (int j = 0; j < bitmap.Height; j++)
+                                {
+                                    int p = bitmap.GetPixel(i, j);
+                                    Android.Graphics.Color c = new Android.Graphics.Color(p);
+                                    c.B = 0;
+                                    copyBitmap.SetPixel(i, j, c);
+                                }
                             }
+                            break;
                         }
-                        break;
-                    }
-                default:
-                    {
-                        break;
-                    }
+                    default:
+                        {
+                            break;
+                        }
+                }
+                if (copyBitmap != null)
+                {
+                    imageoutput.SetImageBitmap(copyBitmap);
+                    bitmap = null;
+                    copyBitmap = null;
+                }
+                System.GC.Collect();
             }
-            if (copyBitmap != null)
-            {
-                imageoutput.SetImageBitmap(copyBitmap);
-                bitmap = null;
-                copyBitmap = null;
-            }
-            System.GC.Collect();
         }
+            
 
         private void NegateColor(char color, ImageView imageoutput)
         {
@@ -244,12 +264,14 @@ namespace ImageEditor
             StartActivityForResult(intent, 0);
         }
 
+
+
+
         protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
         {
             base.OnActivityResult(requestCode, resultCode, data);
 
-            //WHY ARE GALLERY IMAGES BIGGER THAN CAMERA IMAGES?!?!?!?!?!?!!!?!?!?!?!?!?!?!!?!?!?!?!?!?!?
-            //If I find a fix this may actually do something
+            
             if (requestCode == 1)
             {
                 if (resultCode == Result.Ok)
@@ -257,6 +279,8 @@ namespace ImageEditor
                     var imageView = FindViewById<ImageView>(Resource.Id.imageoutput);
 
                     imageView.SetImageURI(data.Data);
+
+
                     imageView.Visibility = Android.Views.ViewStates.Visible;
                 }
                      
@@ -274,7 +298,6 @@ namespace ImageEditor
                     Android.Graphics.Bitmap copyBitmap =
                     bitmap.Copy(Android.Graphics.Bitmap.Config.Argb8888, true);
 
-                    //this code removes all red from a picture
 
                     if (copyBitmap != null)
                     {
@@ -289,6 +312,13 @@ namespace ImageEditor
                 }
                 
             }
+        }
+
+        void ExportBitmapAsPNG(Bitmap bitmap)
+        { 
+            var stream = new FileStream(_file.Path, FileMode.Create);
+            bitmap.Compress(Bitmap.CompressFormat.Png, 100, stream);
+            stream.Close();
         }
     }
 }
