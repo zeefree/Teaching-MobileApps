@@ -5,6 +5,8 @@ using Android.Content;
 using System.Collections.Generic;
 using Android.Content.PM;
 using Android.Provider;
+using Google.Apis.Services;
+using Google.Apis.Vision.v1.Data;
 
 namespace CameraExample
 {
@@ -104,34 +106,57 @@ namespace CameraExample
             //AC: workaround for not passing actual files
             Android.Graphics.Bitmap bitmap = (Android.Graphics.Bitmap)data.Extras.Get("data");
 
-            //scale image to make manipulation easier
-            Android.Graphics.Bitmap smallBitmap =
-                Android.Graphics.Bitmap.CreateScaledBitmap(bitmap, 1024, 768, true);
+            //specify where credentails to load are located
+            string credPath = "google_api.json";
+            Google.Apis.Auth.OAuth2.GoogleCredential credential;
 
-            //write file to phone
-            //Java.IO.FileOutputStream outputStream = new Java.IO.FileOutputStream(_file);  //for java, for C# use below
-            System.IO.FileStream fs = new System.IO.FileStream(_file.Path, System.IO.FileMode.OpenOrCreate);
-            bitmap.Compress(Android.Graphics.Bitmap.CompressFormat.Jpeg, 85, fs);
-            fs.Flush();
-            fs.Close();
-
-            //this code removes all red from a picture
-            for (int i = 0; i < smallBitmap.Width; i++)
+            //load our cert into the credential
+            using (var stream = Assets.Open(credPath))
             {
-                for(int j = 0; j < smallBitmap.Height; j++)
+                credential = Google.Apis.Auth.OAuth2.GoogleCredential.FromStream(stream);
+            }
+            credential = credential.CreateScoped( Google.Apis.Vision.v1.VisionService.Scope.CloudPlatform);
+            var client = new Google.Apis.Vision.v1.VisionService(
+               new BaseClientService.Initializer()
+               {
+                   ApplicationName = "cs480firsttest-195221",
+                   HttpClientInitializer = credential
+               }
+               );
+
+            // tell google that we want to perform feature analysis
+            var request = new AnnotateImageRequest();
+            request.Image = new Image();
+
+            //converts our bitmap object into a byte[] to send to google
+            using (var stream = new System.IO.MemoryStream())
+            {
+                bitmap.Compress(Android.Graphics.Bitmap.CompressFormat.Jpeg, 0, stream);
+                request.Image.Content = System.Convert.ToBase64String(stream.ToArray());
+            }
+
+            //say we want google to us label detection
+            request.Features = new List<Feature>();
+            request.Features.Add(new Feature() { Type = "LABEL_DETECTION" });
+
+            //add to list of items to send to goolge
+            var batch = new BatchAnnotateImagesRequest();
+            batch.Requests = new List<AnnotateImageRequest>();
+            batch.Requests.Add(request);
+
+            //Finally, make the call
+            var apiResult = client.Images.Annotate(batch).Execute();
+            List<string> tags = new List<string>();
+            foreach(var item in apiResult.Responses[0].LabelAnnotations)
+            {
+                tags.Add(item.Description);
+            }
+                if (bitmap != null)
                 {
-                    int p = smallBitmap.GetPixel(i, j);
-                    Android.Graphics.Color c = new Android.Graphics.Color(p);
-                    c.R = 0;
-                    smallBitmap.SetPixel(i, j, c);
+                    imageView.SetImageBitmap(bitmap);
+                    imageView.Visibility = Android.Views.ViewStates.Visible;
+                    bitmap = null;
                 }
-            }
-            if (smallBitmap != null)
-            {
-                imageView.SetImageBitmap(smallBitmap);
-                imageView.Visibility = Android.Views.ViewStates.Visible;
-                bitmap = null;
-            }
 
             // Dispose of the Java side bitmap.
             System.GC.Collect();
