@@ -12,12 +12,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/camerabutton" />
-      <Button
+        <Button
             android:text="Use photo from gallery"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/gallerybutton" />
-      
         <ImageView xmlns:p2="http://schemas.android.com/tools"
             android:src="@android:drawable/ic_menu_gallery"
             android:layout_width="match_parent"
@@ -62,22 +61,21 @@
                     android:layout_width="100dp"
                     android:layout_height="60dp"
                     android:id="@+id/negategreenbutton" />
-              <Button
-                   android:text="High Contrast"
-                   android:layout_width="100dp"
-                   android:layout_height="60dp"
-                   android:id="@+id/contrastbutton" />
-              <Button
-                   android:text="Random Noise"
-                   android:layout_width="100dp"
-                   android:layout_height="60dp"
-                   android:id="@+id/noisebutton" />
-              <Button
-                   android:text="Grey Scale"
-                   android:layout_width="100dp"
-                   android:layout_height="60dp"
-                   android:id="@+id/greyscalebutton" />
-              
+                <Button
+                    android:text="High Contrast"
+                    android:layout_width="100dp"
+                    android:layout_height="60dp"
+                    android:id="@+id/contrastbutton" />
+                <Button
+                    android:text="Random Noise"
+                    android:layout_width="100dp"
+                    android:layout_height="60dp"
+                    android:id="@+id/noisebutton" />
+                <Button
+                    android:text="Grey Scale"
+                    android:layout_width="100dp"
+                    android:layout_height="60dp"
+                    android:id="@+id/greyscalebutton" />
             </LinearLayout>
         </HorizontalScrollView>
         <Button
