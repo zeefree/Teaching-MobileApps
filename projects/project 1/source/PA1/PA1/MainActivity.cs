@@ -146,13 +146,17 @@ namespace PA1
         public void Backspace(object sender, EventArgs e)
         {
             TextView to_edit = FindViewById<TextView>(Resource.Id.IOtext);
-            if(to_edit.Text[0] != '0')
+            if(to_edit.Text.Length > 1)
             {
                 if(to_edit.Text[to_edit.Text.Length - 1] == '.')
                 {
                     decimal_present = false;
                 }
                 to_edit.Text = to_edit.Text.Substring(0, (to_edit.Text.Length - 1));
+            }
+            else
+            {
+                to_edit.Text = "0";
             }
            
         }
