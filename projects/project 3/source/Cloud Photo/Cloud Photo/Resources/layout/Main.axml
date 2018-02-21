@@ -1,15 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+  <LinearLayout
+      android:orientation="vertical"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent">
     <Button
         android:text="Take Picture"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/camerabutton" />
+    <Button
+          android:text="Use photo from gallery"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:id="@+id/gallerybutton" />
     <ImageView xmlns:tools="http://schemas.android.com/tools"
-        android:src="@android:drawable/ic_menu_gallery"
         android:layout_width="match_parent"
         android:id="@+id/mainImage"
         tools:visibility="invisible"
@@ -26,4 +34,5 @@
         android:layout_height="wrap_content"
         android:id="@+id/mainTextView"
         android:gravity="center" />
-</LinearLayout>
+  </LinearLayout>
+</ScrollView>

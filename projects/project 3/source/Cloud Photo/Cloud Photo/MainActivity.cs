@@ -10,7 +10,7 @@ using Google.Apis.Vision.v1.Data;
 
 namespace Cloud_Photo
 {
-    [Activity(Label = "Cloud_Photo", MainLauncher = true, Icon = "@mipmap/icon")]
+    [Activity(Label = "Cloud_Photo", MainLauncher = true, Icon = "@mipmap/icon", ScreenOrientation = ScreenOrientation.Portrait)]
     public class MainActivity : Activity
     {
         /// <summary>
@@ -24,7 +24,8 @@ namespace Cloud_Photo
         public static Java.IO.File _dir;
 
         protected override void OnCreate(Bundle savedInstanceState)
-        {
+        { 
+
             base.OnCreate(savedInstanceState);
 
             // Set our view from the "main" layout resource
@@ -33,6 +34,7 @@ namespace Cloud_Photo
             // Get our button from the layout resource,
             // and attach an event to it
             Button cambtn = FindViewById<Button>(Resource.Id.camerabutton);
+            Button gallybtn = FindViewById<Button>(Resource.Id.gallerybutton);
             Button upload = FindViewById<Button>(Resource.Id.cloudbutton);
 
             if (IsThereAnAppToTakePictures() == true)
@@ -41,7 +43,33 @@ namespace Cloud_Photo
                 cambtn.Click += TakePicture;
             }
 
-            upload.Click += delegate { UploadToCloud(); };
+            upload.Click += delegate { PromptForUpload(); };
+
+            gallybtn.Click += delegate
+            {
+                var imageIntent = new Intent();
+                imageIntent.SetType("image/*");
+                imageIntent.SetAction(Intent.ActionGetContent);
+                StartActivityForResult(Intent.CreateChooser(imageIntent, "Select photo"), 1);
+            };
+        }
+
+        private void PromptForUpload()
+        {
+            AlertDialog.Builder alert = new AlertDialog.Builder(this);
+            alert.SetTitle("Upload to Cloud");
+            alert.SetMessage("You have limited photos to upload to cloud, is this the one you want to upload?");
+            alert.SetPositiveButton("Yes", (senderAlert, args) => 
+                                              { Toast.MakeText(this, "Uploading!", ToastLength.Short).Show();
+                                                UploadToCloud();
+                                              }
+                                   );
+            alert.SetNegativeButton("No", (senderAlert, args) =>
+                                              { Toast.MakeText(this, "Canceled!", ToastLength.Short).Show();}
+                                   );
+
+            Dialog dialog = alert.Create();
+            dialog.Show();
         }
 
         //Need to make sure that the device actually has a camera before trying to use it.
@@ -80,30 +108,81 @@ namespace Cloud_Photo
 
         protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
         {
-            base.OnActivityResult(requestCode, resultCode, data);
-            if (resultCode == Result.Ok)
+            if (requestCode == 1)
             {
-                ImageView imageView = FindViewById<ImageView>(Resource.Id.mainImage);
-                int height = Resources.DisplayMetrics.HeightPixels;
-                int width = imageView.Height;
-
-                //AC: workaround for not passing actual files
-                Android.Graphics.Bitmap bitmap = (Android.Graphics.Bitmap)data.Extras.Get("data");
-                Android.Graphics.Bitmap copyBitmap =
-                bitmap.Copy(Android.Graphics.Bitmap.Config.Argb8888, true);
-
-
-                if (copyBitmap != null)
+                if (resultCode == Result.Ok)
                 {
-                    imageView.SetImageBitmap(copyBitmap);
+                    var imageView = FindViewById<ImageView>(Resource.Id.mainImage);
+
+                    imageView.SetImageURI(data.Data);
+
+                    Android.Graphics.Drawables.BitmapDrawable bd = (Android.Graphics.Drawables.BitmapDrawable)imageView.Drawable;
+                    Android.Graphics.Bitmap bitmap = bd.Bitmap;
+
+                    //Gotta shrink down the bitmaps because they tend to be too big
+
+
+
+                    int height = bitmap.Height;
+                    int width = bitmap.Width;
+
+                    ScaleBounds(ref height, ref width);
+
+                    Android.Graphics.Bitmap smallBitmap =
+                    Android.Graphics.Bitmap.CreateScaledBitmap(bitmap, width, height, true);
+
+                    imageView.SetImageBitmap(smallBitmap);
+
                     imageView.Visibility = Android.Views.ViewStates.Visible;
-                    bitmap = null;
-                    copyBitmap = null;
                 }
 
-                // Dispose of the Java side bitmap.
-                System.GC.Collect();
             }
+            else if (requestCode == 0)
+            {
+                if (resultCode == Result.Ok)
+                {
+                    ImageView imageView = FindViewById<ImageView>(Resource.Id.mainImage);
+                    int height = Resources.DisplayMetrics.HeightPixels;
+                    int width = imageView.Height;
+
+                    //AC: workaround for not passing actual files
+                    Android.Graphics.Bitmap bitmap = (Android.Graphics.Bitmap)data.Extras.Get("data");
+                    Android.Graphics.Bitmap copyBitmap =
+                    bitmap.Copy(Android.Graphics.Bitmap.Config.Argb8888, true);
+
+
+                    if (copyBitmap != null)
+                    {
+                        imageView.SetImageBitmap(copyBitmap);
+                        imageView.Visibility = Android.Views.ViewStates.Visible;
+                        bitmap = null;
+                        copyBitmap = null;
+                    }
+
+                    // Dispose of the Java side bitmap.
+                    System.GC.Collect();
+                }
+
+            }
+        }
+
+        //Most images are going to be too big so we need to shrink them down
+        // This is an attempt to properly scale down images so they keep resolution
+        //The point of acceptable_resoultion is to act as a point of refrence to scale images down to
+        private void ScaleBounds(ref int height, ref int width)
+        {
+
+            /*
+            int acceptal_resoultion = 1024 * 768;
+            int cur_resoultion = height * width;
+
+            if (cur_resoultion > acceptal_resoultion)
+            {
+                height = height / (2 + (cur_resoultion / acceptal_resoultion));
+                width = width / (2 + (cur_resoultion / acceptal_resoultion));
+            }
+            */
+
         }
 
         private void UploadToCloud()
@@ -156,14 +235,17 @@ namespace Cloud_Photo
             {
                 tags.Add(item.Description);
             }
+            AdjustTextView(tags);
+            
         }
 
         private void AdjustTextView(List<string> tags)
         {
             TextView maintxt = FindViewById<TextView>(Resource.Id.mainTextView);
-            foreach (var tag in tags)
+            maintxt.Text = "";
+            foreach (string tag in tags)
             {
-
+                maintxt.Append(tag + "\n");     
             }
         }
 
