@@ -3,36 +3,44 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true">
-  <LinearLayout
-      android:orientation="vertical"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent">
-    <Button
-        android:text="Take Picture"
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/camerabutton" />
-    <Button
-          android:text="Use photo from gallery"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:id="@+id/gallerybutton" />
-    <ImageView xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="match_parent"
-        android:id="@+id/mainImage"
-        tools:visibility="invisible"
-        android:layout_height="300dp"
-        android:maxHeight="300dp" />
-    <Button
-        android:text="Upload to Cloud"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/cloudbutton" />
-    <TextView
-        android:text="Text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/mainTextView"
-        android:gravity="center" />
-  </LinearLayout>
+        android:layout_height="match_parent">
+        <Button
+            android:text="Take Picture"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/camerabutton" />
+        <Button
+            android:text="Use photo from gallery"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/gallerybutton" />
+        <ImageView xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="match_parent"
+            android:id="@+id/mainImage"
+            tools:visibility="invisible"
+            android:layout_height="300dp"
+            android:maxHeight="300dp" />
+        <Button
+            android:text="Upload to Cloud"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/cloudbutton" />
+      <Button
+            android:text="Restart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:id="@+id/refreshbutton" />
+        <TextView
+            android:text="Test"
+            android:textSize="25dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/mainTextView"
+            android:gravity="center" />
+        
+    </LinearLayout>
 </ScrollView>

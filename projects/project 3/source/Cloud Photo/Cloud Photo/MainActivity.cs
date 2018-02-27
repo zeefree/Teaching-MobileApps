@@ -10,9 +10,11 @@ using Google.Apis.Vision.v1.Data;
 
 namespace Cloud_Photo
 {
+    
     [Activity(Label = "Cloud_Photo", MainLauncher = true, Icon = "@mipmap/icon", ScreenOrientation = ScreenOrientation.Portrait)]
     public class MainActivity : Activity
     {
+        bool uploaded_state = false;
         /// <summary>
         /// Used to track the file that we're manipulating between functions
         /// </summary>
@@ -24,7 +26,10 @@ namespace Cloud_Photo
         public static Java.IO.File _dir;
 
         protected override void OnCreate(Bundle savedInstanceState)
-        { 
+        {
+
+            StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+            StrictMode.SetVmPolicy(builder.Build());
 
             base.OnCreate(savedInstanceState);
 
@@ -36,6 +41,13 @@ namespace Cloud_Photo
             Button cambtn = FindViewById<Button>(Resource.Id.camerabutton);
             Button gallybtn = FindViewById<Button>(Resource.Id.gallerybutton);
             Button upload = FindViewById<Button>(Resource.Id.cloudbutton);
+            Button refresh = FindViewById<Button>(Resource.Id.refreshbutton);
+
+            List<Button> cambuttons = new List<Button>();
+
+            cambuttons.Add(cambtn);
+            cambuttons.Add(gallybtn);
+            cambuttons.Add(upload);
 
             if (IsThereAnAppToTakePictures() == true)
             {
@@ -51,6 +63,11 @@ namespace Cloud_Photo
                 imageIntent.SetType("image/*");
                 imageIntent.SetAction(Intent.ActionGetContent);
                 StartActivityForResult(Intent.CreateChooser(imageIntent, "Select photo"), 1);
+            };
+
+            refresh.Click += delegate
+            {
+                SwitchState();
             };
         }
 
@@ -86,7 +103,7 @@ namespace Cloud_Photo
         {
             _dir = new Java.IO.File(
                 Android.OS.Environment.GetExternalStoragePublicDirectory(
-                    Android.OS.Environment.DirectoryPictures), "CameraExample");
+                    Android.OS.Environment.DirectoryPictures), "CloudPhoto");
             if (!_dir.Exists())
             {
                 _dir.Mkdirs();
@@ -97,12 +114,7 @@ namespace Cloud_Photo
         {
             Intent intent = new Intent(MediaStore.ActionImageCapture);
             _file = new Java.IO.File(_dir, string.Format("myPhoto_{0}.jpg", System.Guid.NewGuid()));
-            //android.support.v4.content.FileProvider
-            //getUriForFile(getContext(), "com.mydomain.fileprovider", newFile);
-            //FileProvider.GetUriForFile
-
-            //The line is a problem line for Android 7+ development
-            //intent.PutExtra(MediaStore.ExtraOutput, Android.Net.Uri.FromFile(_file));
+            intent.PutExtra(MediaStore.ExtraOutput, Android.Net.Uri.FromFile(_file));
             StartActivityForResult(intent, 0);
         }
 
@@ -141,22 +153,28 @@ namespace Cloud_Photo
             {
                 if (resultCode == Result.Ok)
                 {
+                    //send to image gallery
+                    Intent mediaScanIntent = new Intent(Intent.ActionMediaScannerScanFile);
+                    var contentUri = Android.Net.Uri.FromFile(_file);
+                    mediaScanIntent.SetData(contentUri);
+                    SendBroadcast(mediaScanIntent);
+
+                    // Display in ImageView. We will resize the bitmap to fit the display.
+                    // Loading the full sized image will consume too much memory
+                    // and cause the application to crash.
                     ImageView imageView = FindViewById<ImageView>(Resource.Id.mainImage);
                     int height = Resources.DisplayMetrics.HeightPixels;
                     int width = imageView.Height;
 
-                    //AC: workaround for not passing actual files
-                    Android.Graphics.Bitmap bitmap = (Android.Graphics.Bitmap)data.Extras.Get("data");
-                    Android.Graphics.Bitmap copyBitmap =
-                    bitmap.Copy(Android.Graphics.Bitmap.Config.Argb8888, true);
+                    //load picture from file
+                    Android.Graphics.Bitmap bitmap = _file.Path.LoadAndResizeBitmap(width, height);
 
 
-                    if (copyBitmap != null)
+                    if (bitmap != null)
                     {
-                        imageView.SetImageBitmap(copyBitmap);
+                        imageView.SetImageBitmap(bitmap);
                         imageView.Visibility = Android.Views.ViewStates.Visible;
                         bitmap = null;
-                        copyBitmap = null;
                     }
 
                     // Dispose of the Java side bitmap.
@@ -215,7 +233,7 @@ namespace Cloud_Photo
             //converts our bitmap object into a byte[] to send to google
             using (var stream = new System.IO.MemoryStream())
             {
-                bitmap.Compress(Android.Graphics.Bitmap.CompressFormat.Jpeg, 0, stream);
+                bitmap.Compress(Android.Graphics.Bitmap.CompressFormat.Jpeg, 90, stream);
                 request.Image.Content = System.Convert.ToBase64String(stream.ToArray());
             }
 
@@ -236,6 +254,35 @@ namespace Cloud_Photo
                 tags.Add(item.Description);
             }
             AdjustTextView(tags);
+
+            SwitchState();
+        }
+
+        private void SwitchState()
+        {
+            Button cambtn = FindViewById<Button>(Resource.Id.camerabutton);
+            Button gallybtn = FindViewById<Button>(Resource.Id.gallerybutton);
+            Button upload = FindViewById<Button>(Resource.Id.cloudbutton);
+            Button refresh = FindViewById<Button>(Resource.Id.refreshbutton);
+
+            if (uploaded_state == false)
+            {
+                cambtn.Visibility = Android.Views.ViewStates.Gone;
+                gallybtn.Visibility = Android.Views.ViewStates.Gone;
+                upload.Visibility = Android.Views.ViewStates.Gone;
+                refresh.Visibility = Android.Views.ViewStates.Visible;
+
+                uploaded_state = false;
+            }
+            else
+            {
+                cambtn.Visibility = Android.Views.ViewStates.Visible;
+                gallybtn.Visibility = Android.Views.ViewStates.Visible;
+                upload.Visibility = Android.Views.ViewStates.Visible;
+                refresh.Visibility = Android.Views.ViewStates.Gone;
+
+                uploaded_state = true;
+            }
             
         }
 
