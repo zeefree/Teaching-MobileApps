@@ -7,6 +7,8 @@ using Android.Content.PM;
 using System.Collections.Generic;
 using Google.Apis.Services;
 using Google.Apis.Vision.v1.Data;
+using Android.Views.InputMethods;
+using System;
 
 namespace Cloud_Photo
 {
@@ -15,6 +17,9 @@ namespace Cloud_Photo
     public class MainActivity : Activity
     {
         bool uploaded_state = false;
+        List<string> tags = new List<string>();
+        List<float> percentage = new List<float>();
+        int response_state = 0;
         /// <summary>
         /// Used to track the file that we're manipulating between functions
         /// </summary>
@@ -42,6 +47,10 @@ namespace Cloud_Photo
             Button gallybtn = FindViewById<Button>(Resource.Id.gallerybutton);
             Button upload = FindViewById<Button>(Resource.Id.cloudbutton);
             Button refresh = FindViewById<Button>(Resource.Id.refreshbutton);
+            EditText editabletext = FindViewById<EditText>(Resource.Id.textfield);
+            TextView maintxt = FindViewById<TextView>(Resource.Id.mainTextView);
+            Button positve = FindViewById<Button>(Resource.Id.positivebutton);
+            Button negative = FindViewById<Button>(Resource.Id.negativebutton);
 
             List<Button> cambuttons = new List<Button>();
 
@@ -68,7 +77,31 @@ namespace Cloud_Photo
             refresh.Click += delegate
             {
                 SwitchState();
+                tags.Clear();
+                percentage.Clear();
+                maintxt.Text = "";
             };
+
+            positve.Click +=  Respond;
+            
+            editabletext.KeyPress += (object sender, Android.Views.View.KeyEventArgs e) =>
+            {
+                if ((e.Event.Action == Android.Views.KeyEventActions.Down) && (e.KeyCode == Android.Views.Keycode.Enter))
+                {
+                    maintxt.Text = maintxt.Text + "\n A " + editabletext.Text + "?";
+                }
+                else
+                {
+                   
+                    e.Handled = false;
+                   
+                }
+            };
+        }
+
+        private void Positve_Click(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         private void PromptForUpload()
@@ -248,12 +281,13 @@ namespace Cloud_Photo
 
             //Finally, make the call
             var apiResult = client.Images.Annotate(batch).Execute();
-            List<string> tags = new List<string>();
+         
             foreach (var item in apiResult.Responses[0].LabelAnnotations)
             {
                 tags.Add(item.Description);
+                percentage.Add((float)(item.Score));
             }
-            AdjustTextView(tags);
+            AdjustTextView();
 
             SwitchState();
         }
@@ -264,6 +298,8 @@ namespace Cloud_Photo
             Button gallybtn = FindViewById<Button>(Resource.Id.gallerybutton);
             Button upload = FindViewById<Button>(Resource.Id.cloudbutton);
             Button refresh = FindViewById<Button>(Resource.Id.refreshbutton);
+            Button positve = FindViewById<Button>(Resource.Id.positivebutton);
+            Button negative = FindViewById<Button>(Resource.Id.negativebutton);
 
             if (uploaded_state == false)
             {
@@ -271,6 +307,8 @@ namespace Cloud_Photo
                 gallybtn.Visibility = Android.Views.ViewStates.Gone;
                 upload.Visibility = Android.Views.ViewStates.Gone;
                 refresh.Visibility = Android.Views.ViewStates.Visible;
+                negative.Visibility = Android.Views.ViewStates.Visible;
+                positve.Visibility = Android.Views.ViewStates.Visible;
 
                 uploaded_state = false;
             }
@@ -280,20 +318,35 @@ namespace Cloud_Photo
                 gallybtn.Visibility = Android.Views.ViewStates.Visible;
                 upload.Visibility = Android.Views.ViewStates.Visible;
                 refresh.Visibility = Android.Views.ViewStates.Gone;
+                negative.Visibility = Android.Views.ViewStates.Gone;
+                positve.Visibility = Android.Views.ViewStates.Gone;
 
                 uploaded_state = true;
             }
             
         }
 
-        private void AdjustTextView(List<string> tags)
+        public void Respond(object sender, EventArgs e)
+        {
+            Button response = sender as Button;
+            TextView maintxt = FindViewById<TextView>(Resource.Id.mainTextView);
+
+            if (response.Id == (Resource.Id.positivebutton))
+            {
+                maintxt.Text = maintxt.Text + "\nYour welcome! If you want to upload a new photo feel free to press the restart button.";
+            }
+            else
+            {
+                maintxt.Text = maintxt.Text + "\n it's not a " + tags[0] + "?\nThen what is it?";
+            }
+
+        }
+
+        private void AdjustTextView()
         {
             TextView maintxt = FindViewById<TextView>(Resource.Id.mainTextView);
-            maintxt.Text = "";
-            foreach (string tag in tags)
-            {
-                maintxt.Append(tag + "\n");     
-            }
+            maintxt.Text = "Wow, that's a pretty cool " + tags[0];
+            
         }
 
     }

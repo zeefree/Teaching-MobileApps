@@ -59,8 +59,17 @@ namespace Cloud_Photo
 			// aapt resource value: 0x7f050005
 			public const int mainTextView = 2131034117;
 			
+			// aapt resource value: 0x7f050008
+			public const int negativebutton = 2131034120;
+			
+			// aapt resource value: 0x7f050007
+			public const int positivebutton = 2131034119;
+			
 			// aapt resource value: 0x7f050004
 			public const int refreshbutton = 2131034116;
+			
+			// aapt resource value: 0x7f050006
+			public const int textfield = 2131034118;
 			
 			static Id()
 			{

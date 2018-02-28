@@ -28,7 +28,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/cloudbutton" />
-      <Button
+        <Button
             android:text="Restart"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -36,11 +36,30 @@
             android:id="@+id/refreshbutton" />
         <TextView
             android:text="Test"
-            android:textSize="25dp"
+            android:textSize="20dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/mainTextView"
             android:gravity="center" />
-        
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/textfield"
+            android:visibility="gone"
+            android:singleLine="true" />
+      <Button
+            android:text="Thanks!"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:id="@+id/positivebutton" />
+      <Button
+            android:text="That's not what it is!"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:tag =""
+            android:id="@+id/negativebutton" />
+     
     </LinearLayout>
 </ScrollView>
