@@ -14,6 +14,9 @@ namespace PA1
     [Activity(Label = "PA1", MainLauncher = true, Icon = "@mipmap/icon")]
     public class MainActivity : Activity
     {
+        //The point of cur_math_expr is foremost to keep track of what the math expression we are working with
+        //It is also to help with clearing when equal was the last thing pressed.
+        //For example if a number is entered after = is pressed the text field is erased, but an operation will not clear nor will decimal (at least the buffer is continued with an op.) 
         char cur_math_expr = ' ';
         float last_num = 0;
         bool decimal_present = false;
@@ -113,7 +116,12 @@ namespace PA1
         {
             Button the_button = sender as Button;
             TextView to_edit = FindViewById<TextView>(Resource.Id.IOtext);
-            if(cur_math_expr == '=')
+            if(the_button.Text == ".")
+            {
+                to_edit.Text = to_edit.Text + the_button.Text;
+
+            }
+            else if(cur_math_expr == '=')
             {
                 to_edit.Text = the_button.Text;
                 cur_math_expr = ' ';
@@ -148,10 +156,6 @@ namespace PA1
             TextView to_edit = FindViewById<TextView>(Resource.Id.IOtext);
             if(to_edit.Text.Length > 1)
             {
-                if(to_edit.Text[to_edit.Text.Length - 1] == '.')
-                {
-                    decimal_present = false;
-                }
                 to_edit.Text = to_edit.Text.Substring(0, (to_edit.Text.Length - 1));
             }
             else
