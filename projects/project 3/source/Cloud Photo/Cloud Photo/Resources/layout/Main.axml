@@ -35,8 +35,7 @@
             android:visibility="gone"
             android:id="@+id/refreshbutton" />
         <TextView
-            android:text="Test"
-            android:textSize="20dp"
+            android:textSize="14dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/mainTextView"
@@ -58,7 +57,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="gone"
-            android:tag =""
             android:id="@+id/negativebutton" />
      
     </LinearLayout>

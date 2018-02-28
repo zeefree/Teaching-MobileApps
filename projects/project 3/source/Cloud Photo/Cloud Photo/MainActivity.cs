@@ -80,15 +80,20 @@ namespace Cloud_Photo
                 tags.Clear();
                 percentage.Clear();
                 maintxt.Text = "";
+                response_state = 0;
             };
 
             positve.Click +=  Respond;
+            negative.Click += Respond;
             
             editabletext.KeyPress += (object sender, Android.Views.View.KeyEventArgs e) =>
             {
                 if ((e.Event.Action == Android.Views.KeyEventActions.Down) && (e.KeyCode == Android.Views.Keycode.Enter))
                 {
+                    editabletext.Visibility = Android.Views.ViewStates.Gone;
                     maintxt.Text = maintxt.Text + "\n A " + editabletext.Text + "?";
+                    CheckTags();
+                   
                 }
                 else
                 {
@@ -99,10 +104,29 @@ namespace Cloud_Photo
             };
         }
 
-        private void Positve_Click(object sender, EventArgs e)
+        private void CheckTags()
         {
-            throw new NotImplementedException();
+            
+            EditText editabletext = FindViewById<EditText>(Resource.Id.textfield);
+            TextView maintxt = FindViewById<TextView>(Resource.Id.mainTextView);
+            bool found = false;
+            for (int i = 0; i < tags.Count; i++)
+            {
+                if (tags[i] == editabletext.Text)
+                {
+                    maintxt.Text = maintxt.Text + "\nOh a " + tags[i] + " my source only gave me a " + percentage[i] + " chance of it being that...";
+                    found = true;
+                }
+            }
+            if(!found)
+            {
+                maintxt.Text = maintxt.Text + "\nGuess my sources were off I didn't even know it was a " + editabletext.Text;
+            }
+
+            maintxt.Text = maintxt.Text + "\nWell if you want to upload a new picture press restart.";
         }
+
+        
 
         private void PromptForUpload()
         {
@@ -153,6 +177,7 @@ namespace Cloud_Photo
 
         protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
         {
+            Button upload = FindViewById<Button>(Resource.Id.cloudbutton);
             if (requestCode == 1)
             {
                 if (resultCode == Result.Ok)
@@ -213,8 +238,8 @@ namespace Cloud_Photo
                     // Dispose of the Java side bitmap.
                     System.GC.Collect();
                 }
-
             }
+            upload.Visibility = Android.Views.ViewStates.Visible;
         }
 
         //Most images are going to be too big so we need to shrink them down
@@ -266,7 +291,7 @@ namespace Cloud_Photo
             //converts our bitmap object into a byte[] to send to google
             using (var stream = new System.IO.MemoryStream())
             {
-                bitmap.Compress(Android.Graphics.Bitmap.CompressFormat.Jpeg, 90, stream);
+                bitmap.Compress(Android.Graphics.Bitmap.CompressFormat.Jpeg, 0, stream);
                 request.Image.Content = System.Convert.ToBase64String(stream.ToArray());
             }
 
@@ -310,18 +335,17 @@ namespace Cloud_Photo
                 negative.Visibility = Android.Views.ViewStates.Visible;
                 positve.Visibility = Android.Views.ViewStates.Visible;
 
-                uploaded_state = false;
+                uploaded_state = true;
             }
             else
             {
                 cambtn.Visibility = Android.Views.ViewStates.Visible;
                 gallybtn.Visibility = Android.Views.ViewStates.Visible;
-                upload.Visibility = Android.Views.ViewStates.Visible;
                 refresh.Visibility = Android.Views.ViewStates.Gone;
                 negative.Visibility = Android.Views.ViewStates.Gone;
                 positve.Visibility = Android.Views.ViewStates.Gone;
 
-                uploaded_state = true;
+                uploaded_state = false;
             }
             
         }
@@ -330,16 +354,25 @@ namespace Cloud_Photo
         {
             Button response = sender as Button;
             TextView maintxt = FindViewById<TextView>(Resource.Id.mainTextView);
+            EditText editabletext = FindViewById<EditText>(Resource.Id.textfield);
+            Button positve = FindViewById<Button>(Resource.Id.positivebutton);
+            Button negative = FindViewById<Button>(Resource.Id.negativebutton);
 
             if (response.Id == (Resource.Id.positivebutton))
             {
-                maintxt.Text = maintxt.Text + "\nYour welcome! If you want to upload a new photo feel free to press the restart button.";
+                
+                 maintxt.Text = maintxt.Text + "\nYour welcome! If you want to upload a new photo feel free to press the restart button.";
+               
             }
             else
             {
                 maintxt.Text = maintxt.Text + "\n it's not a " + tags[0] + "?\nThen what is it?";
+                editabletext.Visibility = Android.Views.ViewStates.Visible;
             }
 
+            negative.Visibility = Android.Views.ViewStates.Gone;
+            positve.Visibility = Android.Views.ViewStates.Gone;
+          
         }
 
         private void AdjustTextView()
