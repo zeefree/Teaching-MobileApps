@@ -31,6 +31,11 @@
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
+              <Button
+                android:text="Remove effects"
+                android:layout_width="100dp"
+                android:layout_height="60dp"
+                android:id="@+id/refresh" />
                 <Button
                     android:text="Remove Red"
                     android:layout_width="100dp"

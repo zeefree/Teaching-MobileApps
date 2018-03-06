@@ -18,7 +18,7 @@ namespace ImageEditor
     public class MainActivity : Activity
     {
 
-      
+        Android.Graphics.Bitmap mainbp = null;
         /// <summary>
         /// Used to track the file that we're manipulating between functions
         /// </summary>
@@ -45,6 +45,7 @@ namespace ImageEditor
             Button savebtn = FindViewById<Button>(Resource.Id.savebutton);
             Button clrbtn = FindViewById<Button>(Resource.Id.clearbutton);
             Button gallybtn = FindViewById<Button>(Resource.Id.gallerybutton);
+            Button refresh = FindViewById<Button>(Resource.Id.refresh);
 
             // Effect Buttons
             Button rmvred = FindViewById<Button>(Resource.Id.removeredbutton);
@@ -77,7 +78,11 @@ namespace ImageEditor
 
             greyscale.Click += delegate { GreyScale(imageView); };
             
-            clrbtn.Click += delegate { imageView.SetImageBitmap(null); };
+            clrbtn.Click += delegate { imageView.SetImageBitmap(null);
+                mainbp = null;
+            };
+
+            refresh.Click += delegate { imageView.SetImageBitmap(mainbp); };
 
             savebtn.Click += delegate
             {
@@ -440,7 +445,7 @@ namespace ImageEditor
                     Android.Graphics.Bitmap.CreateScaledBitmap(bitmap, width, height, true);
 
                     imageView.SetImageBitmap(smallBitmap);
-
+                    mainbp = smallBitmap;
                     imageView.Visibility = Android.Views.ViewStates.Visible;
                 }
                      
@@ -462,6 +467,7 @@ namespace ImageEditor
                     if (copyBitmap != null)
                     {
                         imageView.SetImageBitmap(copyBitmap);
+                        mainbp = copyBitmap;
                         imageView.Visibility = Android.Views.ViewStates.Visible;
                         bitmap = null;
                         copyBitmap = null;
