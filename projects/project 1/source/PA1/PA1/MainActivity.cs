@@ -20,6 +20,7 @@ namespace PA1
         char cur_math_expr = ' ';
         float last_num = 0;
         bool decimal_present = false;
+        string expression_buffer = "";
        
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -105,6 +106,7 @@ namespace PA1
                 }
                 else
                 {
+                    //negative sign is there, get rid of it with a new substring starting at the second character
                     to_edit.Text = to_edit.Text.Substring(1);
                 }
             }
@@ -116,13 +118,9 @@ namespace PA1
         {
             Button the_button = sender as Button;
             TextView to_edit = FindViewById<TextView>(Resource.Id.IOtext);
-            if(the_button.Text == ".")
+            if(cur_math_expr == '=')
             {
-                to_edit.Text = to_edit.Text + the_button.Text;
-
-            }
-            else if(cur_math_expr == '=')
-            {
+                // don't continue to remember content after we hit the equals
                 to_edit.Text = the_button.Text;
                 cur_math_expr = ' ';
             }
@@ -130,6 +128,7 @@ namespace PA1
             {
                 if (to_edit.Text[0] == '0')
                 {
+                    //if the current value is just 0 replace it with the new number
                     to_edit.Text = the_button.Text;
                 }
                 else
@@ -139,9 +138,9 @@ namespace PA1
                 
             }
             
-           
         }
 
+        //check to make sure a decimal doesn't already exist before adding it
         public void DotAdd(object sender, EventArgs e)
         {
             TextView to_edit = FindViewById<TextView>(Resource.Id.IOtext);
